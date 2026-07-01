@@ -1,0 +1,58 @@
+.upload-page { max-width: 640px; }
+
+.drop-zone {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-12);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-align: center;
+}
+.drop-zone:hover, .drop-zone.dragging {
+  border-color: var(--color-accent);
+  background: var(--color-accent-glow);
+}
+.drop-zone.has-file {
+  border-color: var(--color-green);
+  background: rgba(52, 211, 153, 0.05);
+}
+
+.drop-zone-content { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); }
+.drop-icon { font-size: 3rem; }
+.drop-zone-content h3 { font-size: 1.2rem; }
+
+.file-preview { display: flex; align-items: center; gap: var(--space-4); }
+.file-icon { font-size: 2.5rem; }
+.file-name { font-weight: 600; font-size: 1rem; }
+
+.upload-form { padding: var(--space-5); }
+
+.processing-card { padding: var(--space-8); max-width: 640px; }
+
+.stages-list { display: flex; flex-direction: column; gap: var(--space-5); }
+
+.stage-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+}
+.stage-item.active {
+  background: var(--color-accent-glow);
+  border: 1px solid rgba(124, 109, 250, 0.2);
+}
+.stage-item.done { opacity: 0.6; }
+
+.stage-icon-wrap {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.stage-label { font-weight: 600; font-size: 0.95rem; }

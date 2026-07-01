@@ -1,0 +1,38 @@
+{
+  "name": "clarity-server",
+  "version": "1.0.0",
+  "description": "Clarity (BookMind AI) - Backend API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Tests coming soon\" && exit 0"
+  },
+  "keywords": ["ai", "rag", "mern", "gemini", "qdrant"],
+  "author": "jaskeeratsingh05",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@qdrant/js-client-rest": "^1.9.0",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.5.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "firebase-admin": "^12.3.1",
+    "jsonwebtoken": "^9.0.2",
+    "mammoth": "^1.8.0",
+    "mongoose": "^8.5.2",
+    "multer": "^1.4.5-lts.1",
+    "pdf-parse": "^1.1.1",
+    "socket.io": "^4.7.5",
+    "streamifier": "^0.1.1",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
