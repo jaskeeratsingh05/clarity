@@ -2,18 +2,23 @@ const admin = require('firebase-admin');
 
 // Only initialize if Firebase credentials are configured
 if (!admin.apps.length) {
+  const projectId = process.env.FIREBASE_PROJECT_ID || '';
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY || '';
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL || '';
+
+  // Skip Firebase if any placeholder / disabled value is present
+  const SKIP_VALUES = ['', 'your_project_id', 'your_private_key', 'your_client_email', 'disabled'];
   const hasFirebaseConfig =
-    process.env.FIREBASE_PROJECT_ID &&
-    process.env.FIREBASE_PROJECT_ID !== 'your_project_id' &&
-    process.env.FIREBASE_PRIVATE_KEY &&
-    process.env.FIREBASE_CLIENT_EMAIL;
+    !SKIP_VALUES.includes(projectId) &&
+    !SKIP_VALUES.includes(privateKey) &&
+    !SKIP_VALUES.includes(clientEmail);
 
   if (hasFirebaseConfig) {
     admin.initializeApp({
       credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        projectId,
+        privateKey: privateKey.replace(/\\n/g, '\n'),
+        clientEmail,
       }),
     });
     console.log('✅ Firebase Admin initialized');
