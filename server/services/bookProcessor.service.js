@@ -15,10 +15,14 @@ const { v4: uuidv4 } = require('uuid');
  * 3. Generate embeddings for each chunk
  * 4. Upsert vectors into Qdrant
  */
-const processBook = async (book, fileBuffer, io) => {
+const processBook = async (book, fileBuffer, io, userId) => {
   const emit = (stage, progress, message) => {
     if (io) {
-      io.emit(`book:progress:${book._id}`, { stage, progress, message });
+      // Emit only to the specific user's room — not all connected clients
+      const room = userId ? `user:${userId}` : null;
+      if (room) {
+        io.to(room).emit(`book:progress:${book._id}`, { stage, progress, message });
+      }
     }
   };
 

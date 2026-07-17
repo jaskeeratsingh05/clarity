@@ -11,6 +11,9 @@ const askQuestion = async (req, res, next) => {
     const { question, conversationId, aiMode = 'book', explanationStyle = 'student', language = 'english' } = req.body;
 
     if (!question) return next(createError('Question is required', 400));
+    if (typeof question !== 'string') return next(createError('Invalid question format', 400));
+    if (question.trim().length === 0) return next(createError('Question cannot be empty', 400));
+    if (question.length > 2000) return next(createError('Question is too long (max 2000 characters)', 400));
 
     const book = await Book.findOne({ _id: bookId, userId: req.user._id });
     if (!book) return next(createError('Book not found', 404));
@@ -109,7 +112,11 @@ const createConversation = async (req, res, next) => {
 // GET /api/chat/:bookId/conversations/:convId
 const getConversationMessages = async (req, res, next) => {
   try {
-    const messages = await Message.find({ conversationId: req.params.convId }).sort({ createdAt: 1 });
+    // SECURITY FIX: Verify the requesting user owns this conversation (prevents IDOR)
+    const conv = await Conversation.findOne({ _id: req.params.convId, userId: req.user._id });
+    if (!conv) return next(createError('Conversation not found', 404));
+
+    const messages = await Message.find({ conversationId: conv._id }).sort({ createdAt: 1 });
     res.json({ success: true, messages });
   } catch (err) {
     next(err);

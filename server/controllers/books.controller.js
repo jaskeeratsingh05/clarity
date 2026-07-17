@@ -1,7 +1,15 @@
+const path = require('path');
 const Book = require('../models/Book');
 const { createError } = require('../middleware/errorHandler');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../services/cloudinary.service');
 const { processBook } = require('../services/bookProcessor.service');
+const { validateFileMagicBytes } = require('../middleware/upload');
+
+/**
+ * Sanitize filename: strip path traversal characters, keep safe chars only.
+ */
+const sanitizeFilename = (name) =>
+  name.replace(/[^a-zA-Z0-9._\-\s]/g, '').trim().slice(0, 255) || 'untitled';
 
 // POST /api/books/upload
 const uploadBook = async (req, res, next) => {
@@ -9,16 +17,30 @@ const uploadBook = async (req, res, next) => {
     if (!req.file) return next(createError('No file uploaded', 400));
 
     const { originalname, buffer, mimetype, size } = req.file;
-    const fileType = originalname.toLowerCase().endsWith('.pdf') ? 'pdf' : 'docx';
+
+    // Validate magic bytes — prevents extension spoofing
+    try {
+      validateFileMagicBytes(req.file);
+    } catch (magicError) {
+      return next(magicError);
+    }
+
+    const ext = path.extname(originalname).toLowerCase();
+    const fileType = ext === '.pdf' ? 'pdf' : 'docx';
+    const safeFilename = sanitizeFilename(originalname);
+
+    // Sanitize user-provided title
+    const rawTitle = req.body.title || originalname.replace(/\.[^/.]+$/, '');
+    const title = rawTitle.trim().slice(0, 200) || 'Untitled Book';
 
     // 1. Upload raw file to Cloudinary
-    const { url, publicId } = await uploadToCloudinary(buffer, originalname, mimetype);
+    const { url, publicId } = await uploadToCloudinary(buffer, safeFilename, mimetype);
 
     // 2. Create book record in DB
     const book = await Book.create({
       userId: req.user._id,
-      title: req.body.title || originalname.replace(/\.[^/.]+$/, ''),
-      originalFilename: originalname,
+      title,
+      originalFilename: safeFilename,
       fileType,
       fileSize: size,
       cloudinaryUrl: url,
@@ -31,7 +53,7 @@ const uploadBook = async (req, res, next) => {
 
     // 4. Kick off async processing pipeline (emit socket progress events)
     const io = req.app.get('io');
-    processBook(book, buffer, io).catch((err) => {
+    processBook(book, buffer, io, req.user._id.toString()).catch((err) => {
       console.error(`❌ Book processing failed for ${book._id}:`, err.message);
     });
   } catch (err) {

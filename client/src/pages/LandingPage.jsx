@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import CustomCursor from '../components/ui/CustomCursor';
 import './LandingPage.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -135,66 +136,6 @@ const CursorGlow = () => {
     return () => window.removeEventListener('mousemove', move);
   }, []);
   return <div ref={glowRef} className="cursor-glow" />;
-};
-
-/* ─── Custom cursor dot + ring ─── */
-const CustomCursor = () => {
-  const dotRef = useRef(null);
-  const ringRef = useRef(null);
-
-  useEffect(() => {
-    const dot = dotRef.current;
-    const ring = ringRef.current;
-    if (!dot || !ring) return;
-    if (!window.matchMedia('(pointer: fine)').matches) return;
-
-    const onMove = (e) => {
-      gsap.to(dot, { x: e.clientX, y: e.clientY, duration: 0.06, ease: 'none' });
-      gsap.to(ring, { x: e.clientX, y: e.clientY, duration: 0.26, ease: 'power2.out' });
-    };
-    const onEnter = () => {
-      gsap.to(dot, { scale: 0.35, duration: 0.2 });
-      gsap.to(ring, { scale: 2.4, borderColor: 'rgba(167,139,250,0.85)', duration: 0.3 });
-    };
-    const onLeave = () => {
-      gsap.to(dot, { scale: 1, duration: 0.2 });
-      gsap.to(ring, { scale: 1, borderColor: 'rgba(167,139,250,0.5)', duration: 0.3 });
-    };
-    const onDown = () => gsap.to([dot, ring], { scale: 0.7, duration: 0.1 });
-    const onUp   = () => gsap.to([dot, ring], { scale: 1, duration: 0.25, ease: 'back.out(2)' });
-
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mousedown', onDown);
-    window.addEventListener('mouseup', onUp);
-
-    const selectors = 'a, button, [role="button"], .tilt-card, .book-scene, input, textarea';
-    document.querySelectorAll(selectors).forEach(el => {
-      el.addEventListener('mouseenter', onEnter);
-      el.addEventListener('mouseleave', onLeave);
-    });
-
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mousedown', onDown);
-      window.removeEventListener('mouseup', onUp);
-    };
-  }, []);
-
-  return (
-    <>
-      <div ref={dotRef} style={{
-        position: 'fixed', top: 0, left: 0, width: 8, height: 8,
-        borderRadius: '50%', background: '#a78bfa', pointerEvents: 'none',
-        zIndex: 99999, transform: 'translate(-50%,-50%)', willChange: 'transform',
-      }} />
-      <div ref={ringRef} style={{
-        position: 'fixed', top: 0, left: 0, width: 36, height: 36,
-        borderRadius: '50%', border: '1.5px solid rgba(167,139,250,0.5)',
-        pointerEvents: 'none', zIndex: 99998, transform: 'translate(-50%,-50%)',
-        willChange: 'transform',
-      }} />
-    </>
-  );
 };
 
 /* ─── Animated counter ─── */
